@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fundamentos de R - Semana 3</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            color: white;
+            overflow: hidden;
+        }
+
+        .presentation-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            padding: 40px;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            overflow: hidden;
+        }
+
+        .slide.active {
+            opacity: 1;
+        }
+
+        .slide-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            height: auto;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 8px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(153, 102, 204, 0.3);
+        }
+
+        .logo img {
+            height: 35px;
+            width: auto;
+        }
+
+        .slide-number {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.1rem;
+        }
+
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            text-align: center;
+        }
+
+        .slide-title {
+            font-size: 2.8rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 40px rgba(255, 215, 0, 0.3);
+            line-height: 1.2;
+        }
+
+        .slide-subtitle {
+            font-size: 1.2rem;
+            color: #87CEEB;
+            margin-bottom: 25px;
+            font-weight: 300;
+        }
+
+        .content-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+            margin: 15px 0;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            height: auto;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #FFD700, #FFA500, #87CEEB);
+        }
+
+        .card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(255, 215, 0, 0.2);
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            display: block;
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.3));
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            color: #98FB98;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .card-content {
+            color: rgba(255, 255, 255, 0.9);
+            line-height: 1.6;
+        }
+
+        .bullet-list {
+            text-align: left;
+            list-style: none;
+            padding: 0;
+        }
+
+        .bullet-list li {
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+        }
+
+        .bullet-list li::before {
+            content: '▶';
+            position: absolute;
+            left: 0;
+            color: #FFD700;
+            font-size: 0.9rem;
+        }
+
+        .code-snippet {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            margin: 15px 0;
+            border-left: 5px solid #FFD700;
+            box-shadow: 0 4px 25px rgba(0, 0, 0, 0.3);
+            text-align: left;
+            max-width: 600px;
+        }
+
+        .code-comment {
+            color: #98FB98;
+        }
+
+        .code-keyword {
+            color: #87CEEB;
+            font-weight: bold;
+        }
+
+        .r-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: white;
+            font-weight: bold;
+            margin: 0 5px;
+            font-size: 1.1em;
+        }
+
+        .r-logo img {
+            height: 25px;
+            width: auto;
+        }
+
+        .navigation {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 15px;
+            z-index: 1000;
+        }
+
+        .nav-btn {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+
+        .nav-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.05);
+        }
+
+        .slide-indicator {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .indicator-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .indicator-dot.active {
+            background: #FFD700;
+            transform: scale(1.3);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+
+        .slide-footer {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            margin-top: 30px;
+        }
+
+        .highlight {
+            color: #FFD700;
+            font-weight: bold;
+        }
+
+        .steps-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 25px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        .step-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            position: relative;
+        }
+
+        .step-number {
+            position: absolute;
+            top: -15px;
+            left: 25px;
+            background: #FFD700;
+            color: #1a1a2e;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .slide {
+                padding: 20px 15px;
+            }
+            .slide-title {
+                font-size: 2rem;
+            }
+            .slide-subtitle {
+                font-size: 1rem;
+            }
+            .content-cards {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            .steps-container {
+                grid-template-columns: 1fr;
+            }
+            .card {
+                padding: 15px;
+            }
+            .card-icon {
+                font-size: 2rem;
+            }
+        }
+
+        /* Animaciones */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slide.active .slide-title {
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+
+        .slide.active .slide-subtitle {
+            animation: fadeInUp 0.8s ease 0.4s both;
+        }
+
+        .slide.active .card {
+            animation: fadeInUp 0.8s ease both;
+        }
+
+        .slide.active .card:nth-child(1) { animation-delay: 0.6s; }
+        .slide.active .card:nth-child(2) { animation-delay: 0.8s; }
+        .slide.active .card:nth-child(3) { animation-delay: 1s; }
+        .slide.active .card:nth-child(4) { animation-delay: 1.2s; }
+    </style>
+</head>
+<body>
+    <div class="presentation-container">
+        <!-- Slide 1: Título -->
+        <div class="slide active" id="slide-1">
+            <div class="slide-header">
+                <div class="logo-container">
+                    <div class="logo">
+                        <img src="./LogoUlacit.png" alt="ULACIT Logo">
+                        <span></span>
+                    </div>
+                </div>
+                <div class="slide-number">1 / 8</div>
+            </div>
+            <div class="slide-content">
+                <h1 class="slide-title">Fundamentos de<br>Programación en <span class="r-logo"><img src="./R_logo.png" alt="R Logo"></span></h1>
+                <p class="slide-subtitle">Semana 3 - Análisis de Datos Avanzado para Negocios/p>
+                <div class="content-cards">
+                    <div class="card">
+                        <span class="card-icon">📚</span>
+                        <h3 class="card-title">Curso</h3>
+                        <p class="card-content">Análisis de Datos Avanzado para Negocios</p>
+                    </div>
+                    <div class="card">
+                        <span class="card-icon">👨‍🏫</span>
+                        <h3 class="card-title">Profesor</h3>
+                        <p class="card-content">Andrew Bocker Páez</p>
+                    </div>
+                    <div class="card">
+                        <span class="card-icon">💻</span>
+                        <h3 class="card-title">Modalidad</h3>
+                        <p class="card-content">Virtual</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 2: Objetivos -->
+        <div class="slide" id="slide-2">
+            <div class="slide-header">
+                <div class="logo-container">
+                    <div class="logo">
+                        <img src="./LogoUlacit.png" alt="ULACIT Logo">
+                        <span></span>
+                    </div>
+                </div>
+                <div class="slide-number">2 / 8</div>
+            </div>
+            <div class="slide-content">
+                <h1 class="slide-title">Objetivos</h1>
+                <p class="slide-subtitle">¿Qué aprenderemos hoy?</p>
+                <div class="content-cards">
+                    <div class="card">
+                        <span class="card-icon">🔧</span>
+                        <h3 class="card-title">Instalación</h3>
+                        <div class="card-content">
+                            <ul class="bullet-list">
+                                <li>Instalar R y RStudio</li>
+                                <li>Configurar el entorno</li>
+                                <li>Primer contacto con la interfaz</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <span class="card-icon">📊</span>
+                        <h3 class="card-title">Estructuras</h3>
+                        <div class="card-content">
+                            <ul class="bullet-list">
+                                <li>Vectores y matrices</li>
+                                <li>Data frames</li>
+                                <li>Tipos de datos</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <span class="card-icon">⚡</span>
+                        <h3 class="card-title">Operaciones</h3>
+                        <div class="card-content">
+                            <ul class="bullet-list">
+                                <li>Funciones básicas</li>
+                                <li>Importación de datos</li>
+                                <li>Paquetes esenciales</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: ¿Qué es R? -->
+        <div class="slide" id="slide-3">
+            <div class="slide-header">
+                <div class="logo-container">
+                    <div class="logo">
+                        <img src="./LogoUlacit.png" alt="ULACIT Logo">
+                        <span></span>
+                    </div>
+                </div>
+                <div class="slide-number">3 / 8</div>
+            </div>
+            <div class="slide-content">
+                <h1 class="slide-title">¿Qué es <span class="r-logo"><img src="./R_logo.png" alt="R Logo"></span>?</h1>
+                <p class="slide-subtitle">Tu nueva herramienta de análisis estadístico</p>
+                <div class="content-cards">
+                    <div class="card">
+                        <span class="card-icon">🔬</span>
+                        <h3 class="card-title">Lenguaje Estadístico</h3>
+                        <div class="card-content">
+                            <ul class="bullet-list">
+                                <li>Creado por estadísticos</li>
+                                <li>Enfocado en análisis de datos</li>
+                                <li>Comunidad científica global</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <span class="card-icon">🆓</span>
+                        <h3 class="card-title">Open Source</h3>
+                        <div class="card-content">
+                            <ul class="bullet-list">
+                                <li>Software libre y gratuito</li>
+                                <li>Código abierto</li>
+                                <li>Multiplataforma</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <span class="card-icon">📦</span>
+                        <h3 class="card-title">Extensible</h3>
+                        <div class="card-content">
+                            <ul class="bullet-list">
+                                <li>+18,000 paquetes</li>
+                                <li>CRAN repository</li>
+                                <li>Funcionalidades especializadas</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="code-snippet">
+                    <span class="code-comment"># Tu primer comando en R</span><br>
+                    <span class="code-keyword">print</span>("¡Hola, mundo desde R!")
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: RStudio -->
+        <div class="slide" id="slide-4">
+            <div class="slide-header">
+                <div class="logo-container">
+                    <div class="logo">
+                        <img src="./LogoUlacit.png" alt="ULACIT Logo">
+                        <span></span>
+                    </div>
+                </div>
+                <div class="slide-number">4 / 8</div>
+            </div>
+            <div class="slide-content">
+                <h1 class="slide-title">RStudio</h1>
+                <p class="slide-subtitle">El IDE que hace R más fácil</p>
+                <div class="content-cards">
+                    <div class="card">
+                        <span class="card-icon">💻</span>
+                        <h3 class="card-title">IDE Integrado</h3>
+                        <div class="card-content">
+                            <ul class="bullet-list">
+                                <li>Editor de código avanzado</li>
+                                <li>Consola integrada</li>
+                                <li>Gestión de proyectos</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <span class="card-icon">📊</span>
+                        <h3 class="card-title">Visualización</h3>
+                        <div class="card-content">
+                            <ul class="bullet-list">
+                                <li>Viewer de gráficos</li>
+                                <li>Explorador de datos</li>
+                                <li>Help integrado</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <span class="card-icon">🔧</span>
+                        <h3 class="card-title">Herramientas</h3>
+                        <div class="card-content">
+                            <ul class="bullet-list">
+                                <li>Git integration</li>
+                                <li>Package manager</li>
+                                <li>R Markdown support</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Instalación -->
+        <div class="slide" id="slide-5">
+            <div class="slide-header">
+                <div class="logo-container">
+                    <div class="logo">
+                        <img src="./LogoUlacit.png" alt="ULACIT Logo">
+                        <span></span>
+                    </div>
+                </div>
+                <div class="slide-number">5 / 8</div>
+            </div>
+            <div class="slide-content">
+                <h1 class="slide-title">Instalación</h1>
+                <p class="slide-subtitle">Paso a paso</p>
+                <div class="steps-container">
+                    <div class="step-card">
+                        <div class="step-number">1</div>
+                        <h3 class="card-title">Instalar R</h3>
+                        <div class="card-content">
+                            <ul class="bullet-list">
+                                <li>Visita <span class="highlight">cran.r-project.org</span></li>
+                                <li>Selecciona tu SO</li>
+                                <li>Descarga e instala</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="step-card">
+                        <div class="step-number">2</div>
+                        <h3 class="card-title">Instalar RStudio</h3>
+                        <div class="card-content">
+                            <ul class="bullet-list">
+                                <li>Visita <span class="highlight">rstudio.com</span></li>
+                                <li>RStudio Desktop</li>
+                                <li>Instala después de R</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="code-snippet">
+                    <span class="code-comment"># Verificar instalación</span><br>
+                    <span class="code-keyword">version</span><br>
+                    <span class="code-keyword">sessionInfo</span>()
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6: Interfaz RStudio -->
+        <div class="slide" id="slide-6">
+            <div class="slide-header">
+                <div class="logo-container">
+                    <div class="logo">
+                        <img src="./LogoUlacit.png" alt="ULACIT Logo">
+                        <span></span>
+                    </div>
+                </div>
+                <div class="slide-number">6 / 8</div>
+            </div>
+            <div class="slide-content">
+                <h1 class="slide-title">Interfaz de RStudio</h1>
+                <p class="slide-subtitle">Conociendo nuestro entorno de trabajo</p>
+                <div class="content-cards">
+                    <div class="card">
+                        <span class="card-icon">📝</span>
+                        <h3 class="card-title">Editor</h3>
+                        <p class="card-content">Donde escribes tus scripts de R con resaltado de sintaxis</p>
+                    </div>
+                    <div class="card">
+                        <span class="card-icon">🖥️</span>
+                        <h3 class="card-title">Consola</h3>
+                        <p class="card-content">Ejecuta comandos en tiempo real y muestra resultados</p>
+                    </div>
+                    <div class="card">
+                        <span class="card-icon">🗂️</span>
+                        <h3 class="card-title">Environment</h3>
+                        <p class="card-content">Muestra objetos creados e historial de comandos</p>
+                    </div>
+                    <div class="card">
+                        <span class="card-icon">📁</span>
+                        <h3 class="card-title">Files/Plots</h3>
+                        <p class="card-content">Gestiona archivos, gráficos y paquetes</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Estructuras de Datos -->
+        <div class="slide" id="slide-7">
+            <div class="slide-header">
+                <div class="logo-container">
+                    <div class="logo">
+                        <img src="./LogoUlacit.png" alt="ULACIT Logo">
+                        <span></span>
+                    </div>
+                </div>
+                <div class="slide-number">7 / 8</div>
+            </div>
+            <div class="slide-content">
+                <h1 class="slide-title">Estructuras de Datos</h1>
+                <p class="slide-subtitle">Los bloques fundamentales</p>
+                <div class="content-cards">
+                    <div class="card">
+                        <span class="card-icon">🔢</span>
+                        <h3 class="card-title">Vectores</h3>
+                        <div class="code-snippet">
+                            <span class="code-comment"># Crear vectores</span><br>
+                            <span class="code-keyword">numeros</span> <- c(1, 2, 3, 4)<br>
+                            <span class="code-keyword">texto</span> <- c("a", "b", "c")
+                        </div>
+                    </div>
+                    <div class="card">
+                        <span class="card-icon">🔲</span>
+                        <h3 class="card-title">Matrices</h3>
+                        <div class="code-snippet">
+                            <span class="code-comment"># Crear matriz 3x3</span><br>
+                            <span class="code-keyword">matriz</span> <- matrix(1:9, nrow=3)
+                        </div>
+                    </div>
+                    <div class="card">
+                        <span class="card-icon">📋</span>
+                        <h3 class="card-title">Data Frames</h3>
+                        <div class="code-snippet">
+                            <span class="code-comment"># Crear data frame</span><br>
+                            <span class="code-keyword">df</span> <- data.frame(<br>
+                            &nbsp;&nbsp;nombre = c("Ana", "Luis"),<br>
+                            &nbsp;&nbsp;edad = c(25, 30)<br>
+                            )
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Tidyverse -->
+        <div class="slide" id="slide-8">
+            <div class="slide-header">
+                <div class="logo-container">
+                    <div class="logo">
+                        <img src="./LogoUlacit.png" alt="ULACIT Logo">
+                        <span></span>
+                    </div>
+                </div>
+                <div class="slide-number">8 / 8</div>
+            </div>
+            <div class="slide-content">
+                <h1 class="slide-title">Tidyverse</h1>
+                <p class="slide-subtitle">Herramientas modernas para análisis de datos</p>
+                <div class="content-cards">
+                    <div class="card">
+                        <span class="card-icon">📦</span>
+                        <h3 class="card-title">¿Qué es?</h3>
+                        <div class="card-content">
+                            <ul class="bullet-list">
+                                <li>Colección de paquetes</li>
+                                <li>Diseño coherente</li>
+                                <li>Sintaxis intuitiva</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <span class="card-icon">🔧</span>
+                        <h3 class="card-title">Paquetes</h3>
+                        <div class="card-content">
+                            <ul class="bullet-list">
+                                <li><span class="highlight">dplyr</span> - manipulación</li>
+                                <li><span class="highlight">ggplot2</span> - visualización</li>
+                                <li><span class="highlight">readr</span> - importación</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="code-snippet">
+                    <span class="code-comment"># Instalación e importación</span><br>
+                    <span class="code-keyword">install.packages</span>("tidyverse")<br>
+                    <span class="code-keyword">library</span>(tidyverse)<br><br>
+                    <span class="code-comment"># Ejemplo con dplyr</span><br>
+                    datos %>%<br>
+                    &nbsp;&nbsp;filter(edad > 25) %>%<br>
+                    &nbsp;&nbsp;select(nombre, edad)
+                </div>
+            </div>
+            <div class="slide-footer">
+                ¡Comencemos con la práctica!
+            </div>
+        </div>
+    </div>
+
+    <!-- Controles de navegación -->
+    <div class="navigation">
+        <button class="nav-btn" onclick="previousSlide()">◀ Anterior</button>
+        <button class="nav-btn" onclick="nextSlide()">Siguiente ▶</button>
+    </div>
+
+    <!-- Indicadores de slide -->
+    <div class="slide-indicator">
+        <div class="indicator-dot active" onclick="goToSlide(1)"></div>
+        <div class="indicator-dot" onclick="goToSlide(2)"></div>
+        <div class="indicator-dot" onclick="goToSlide(3)"></div>
+        <div class="indicator-dot" onclick="goToSlide(4)"></div>
+        <div class="indicator-dot" onclick="goToSlide(5)"></div>
+        <div class="indicator-dot" onclick="goToSlide(6)"></div>
+        <div class="indicator-dot" onclick="goToSlide(7)"></div>
+        <div class="indicator-dot" onclick="goToSlide(8)"></div>
+    </div>
+
+    <script>
+        let currentSlide = 1;
+        const totalSlides = 8;
+
+        function showSlide(slideNumber) {
+            // Ocultar todos los slides
+            document.querySelectorAll('.slide').forEach(slide => {
+                slide.classList.remove('active');
+            });
+            
+            // Mostrar el slide actual
+            document.getElementById(`slide-${slideNumber}`).classList.add('active');
+            
+            // Actualizar indicadores
+            document.querySelectorAll('.indicator-dot').forEach((dot, index) => {
+                dot.classList.toggle('active', index + 1 === slideNumber);
+            });
+            
+            currentSlide = slideNumber;
+        }
+
+        function nextSlide() {
+            if (currentSlide < totalSlides) {
+                showSlide(currentSlide + 1);
+            }
+        }
+
+        function previousSlide() {
+            if (currentSlide > 1) {
+                showSlide(currentSlide - 1);
+            }
+        }
+
+        function goToSlide(slideNumber) {
+            showSlide(slideNumber);
+        }
+
+        // Navegación con teclado
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'ArrowRight' || event.key === ' ') {
+                nextSlide();
+            } else if (event.key === 'ArrowLeft') {
+                previousSlide();
+            } else if (event.key >= '1' && event.key <= '8') {
+                goToSlide(parseInt(event.key));
+            }
+        });
+
+        // Inicializar presentación
+        showSlide(1);
+    </script>
+</body>
+</html>
